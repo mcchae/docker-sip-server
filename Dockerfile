@@ -32,7 +32,7 @@ RUN cd /usr/src \
 	&& chmod +x /tmp/foo \
 	&& mv /tmp/foo ./contrib/scripts/install_prereq \
 	&& ./contrib/scripts/install_prereq install \
-    && ./configure \
+    && ./configure --disable-xmldoc \
     && make \
     && make install \
     && make samples \
