@@ -1,45 +1,41 @@
-FROM debian:jessie
-MAINTAINER MoonChang Chae <mcchae@gmail.com>
+FROM ubuntu:16.04
+MAINTAINER Jerry <mcchae@gmail.com>
 
-RUN useradd --system asterisk
+ENV DEBIAN_FRONTEND noninteractive
 
-RUN apt-get update -qq && \
-    DEBIAN_FRONTEND=noninteractive \
-    apt-get install -y --no-install-recommends \
-            autoconf \
-            binutils-dev \
-            build-essential \
-            ca-certificates \
-            curl \
-            libcurl4-openssl-dev \
-            libedit-dev \
-            libgsm1-dev \
-            libjansson-dev \
-            libogg-dev \
-            libpopt-dev \
-            libresample1-dev \
-            libspandsp-dev \
-            libspeex-dev \
-            libspeexdsp-dev \
-            libsqlite3-dev \
-            libsrtp0-dev \
-            libssl-dev \
-            libvorbis-dev \
-            libxml2-dev \
-            libxslt1-dev \
-            portaudio19-dev \
-            python-pip \
-            unixodbc-dev \
-            uuid \
-            uuid-dev \
-            xmlstarlet \
-            && \
-    pip install j2cli && \
-    apt-get purge -y --auto-remove && rm -rf /var/lib/apt/lists/*
+RUN apt-get update \
+    && apt-get install -y \
+        build-essential \
+        libxml2-dev \
+        libncurses5-dev \
+		libnewt-dev \
+		libedit-dev \
+        libsqlite3-dev \
+        libjansson-dev \
+        libssl-dev \
+        libtool \
+        sqlite \
+		autoconf \
+		automake \
+		git-core \
+		subversion \
+		wget \
+		net-tools \
+		tcpdump
 
-ENV ASTERISK_VERSION=14.0.2
-COPY build-asterisk.sh /build-asterisk
-RUN /build-asterisk && rm -f /build-asterisk
-COPY asterisk-docker-entrypoint.sh /
-CMD ["/usr/sbin/asterisk", "-f"]
-ENTRYPOINT ["/asterisk-docker-entrypoint.sh"]
+ENV ASTERISK_VERSION 15.7.2
+RUN cd /usr/src \
+	&& wget http://downloads.asterisk.org/pub/telephony/asterisk/asterisk-${ASTERISK_VERSION}.tar.gz \
+    && tar -zxvf asterisk-${ASTERISK_VERSION}.tar.gz \
+	&& cd asterisk-${ASTERISK_VERSION} \
+	&& sed -e 's/apt-get install aptitude/apt-get install -y aptitude/g'  ./contrib/scripts/install_prereq > /tmp/foo \
+	&& chmod +x /tmp/foo \
+	&& mv /tmp/foo ./contrib/scripts/install_prereq \
+	&& ./contrib/scripts/install_prereq install \
+    && ./configure \
+    && make \
+    && make install \
+    && make samples \
+    && make config
+
+CMD asterisk -fvvv
