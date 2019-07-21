@@ -23,7 +23,8 @@ RUN apt-get update \
 		net-tools \
 		tcpdump
 
-ENV ASTERISK_VERSION 15.7.2
+#ENV ASTERISK_VERSION 15.7.2
+ENV ASTERISK_VERSION 15.7.3
 RUN cd /usr/src \
 	&& wget http://downloads.asterisk.org/pub/telephony/asterisk/asterisk-${ASTERISK_VERSION}.tar.gz \
     && tar -zxvf asterisk-${ASTERISK_VERSION}.tar.gz \
